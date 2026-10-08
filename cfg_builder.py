@@ -25,6 +25,22 @@ class CFGBuilder:
         permanecem nele. Comandos de controle podem mudar a continuação.
         None indica que os caminhos deste bloco não alcançam o próximo comando.
         """
+        #B0 entry
+        #b3 if(teste b) 
+            #B4 
+                #ifzao para chegar tipo
+                #_build_if
+                #_build_statment
+                #build_while
+                #B6
+        #B5
+            #return que ainda nao sei como fazer
+        #B1
+            #return_exit
+        #B2
+            #error
+
+        
 
         raise NotImplementedError("implemente CFGBuilder._build_block")
 
@@ -40,5 +56,14 @@ class CFGBuilder:
 
     def _build_while(self, statement: WhileStmt, current: BlockId) -> BlockId | None:
         """TODO: construa o fluxo do laço e devolva sua continuação."""
+            #ver slide aula9
+            #int currentBlock
+            #currentBlock = BlockId
+            #while(WhileStmt):
+                #_build_statement(???)
+                #currentBlock = self._build_block.BlockId
+
+
+            #return curerntBlock
 
         raise NotImplementedError("implemente CFGBuilder._build_while")
