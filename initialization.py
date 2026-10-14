@@ -104,6 +104,7 @@ class InitializationAnalyzer:
                     changed = True
                 
         return facts
+        raise NotImplementedError("implemente a atualização até ponto fixo")
 
     def _meet_predecessors(
         self, block_id: BlockId, facts: InitializationFacts,
@@ -133,3 +134,4 @@ class InitializationAnalyzer:
             )
 
         return initialized
+        raise NotImplementedError("implemente a junção de inicialização")

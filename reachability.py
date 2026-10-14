@@ -23,3 +23,4 @@ def compute_reachable(cfg: CFG) -> set[BlockId]:
             pending.append(successor)
 
     return reachable
+    raise NotImplementedError("implemente compute_reachable")
