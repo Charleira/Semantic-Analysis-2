@@ -104,7 +104,7 @@ def check_function_exit(cfg: CFG, reachable: set[int]) -> list[SemanticDiagnosti
     return[
         SemanticDiagnostic(
             kind=SemanticErrorKind.MISSING_RETURN,
-            message=f"função '{cfg.function.name}'  terminar sem return ou em loop de While"
+            message=f"função '{cfg.function.name}'  terminar sem return ou em loop de While",
             span=cfg.function.span
         )
 

@@ -28,7 +28,7 @@ class CFGBuilder:
         currentLocal = current
 
         #percorrer todos os statments armazenados
-        for statment in block.statments:
+        for statment in block.statements:
             #verifica se o comando anterior terminou o fluxo normal, se sim, 
             #ele não alcança o próximo comando
             if currentLocal is None:
