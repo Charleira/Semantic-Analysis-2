@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import load_previous  # Disponibiliza os módulos das etapas anteriores.
 
-from ast_nodes import Block, FunctionDecl, IfStmt, Stmt, WhileStmt, Assignment, CallStmt, PrintStmt, ReturnStmt, VarDecl
-from cfg import BlockId, CFG, Jump, Branch, Return
+from ast_nodes import Block, FunctionDecl, IfStmt, Stmt, WhileStmt, Assignment, CallStmt, PrintStmt, ReturnStmt, VarDecl, BoolLiteral
+from cfg import BlockId, CFG, Jump, Branch, Return, ScopeExit
 
 
 class CFGBuilder:
@@ -35,7 +35,17 @@ class CFGBuilder:
                 break
             #manda o bloco atual para o build_Statment, nele resolveremos mais de manter o bloco e sua continuação
             currentLocal = self._build_statement(statment, currentLocal)
+        #CORRIGIDO DE ERROO: e o bloco possui uma continuação normal,
+        # registra que estamos saindo do escopo desse bloco
+        if currentLocal is not None:
 
+             #recupera o escopo associado ao bloco pela análise anterior
+            scope = block.metadata["scope"]
+
+            #adiciona a operação de saída de escopo
+            self.cfg.blocks[currentLocal].operations.append(
+                ScopeExit(scope)
+            )
         return currentLocal
 
 
@@ -164,16 +174,47 @@ class CFGBuilder:
         whileBlock = self.cfg.new_block()
 
         #bloco do que vem depois do while, talvez renomear dps para restoBlock igual o do if
-        restoBlock = self.cfg.new_block()
-
+        #restoBlock = self.cfg.new_block()
+        #CORRIGIDO ERRO:
+        #Aconteceu um erro ao executar
         #Conecta o bloco atual ao bloco que verifica a condição
         #a gente precisa conectar eles pois o condBlock sempre ser checado
         self.cfg.terminate(
             current,
             Jump(condBlock.id)
         )
+        #se não existir caminho falso, foi isso que quebrou quando eu sempre
+        #assumia que o caminho tinha um restoBlock, agora esse é o lado que não existe
+        #caminho falso e restoBlock vai ser criado dps
+        if isinstance(statement.condition, BoolLiteral) and statement.condition.value:
 
-        #Define os dois caminhos possíveis da condição, dando para o condBlock essa checagem
+            # é verdadeira, já se conecta direto com o corpo do WHilE
+            self.cfg.terminate(
+                condBlock.id,
+                Jump(whileBlock.id)
+            )
+
+            #Cria o WhileTrue infinito co mos comandos que tão dentro dele
+            whileTrue = self._build_block(
+                statement.body,
+                whileBlock.id
+            )
+
+            #Se o while possui continuação normal,
+            #volta para verificar a condição novamente
+            if whileTrue is not None:
+                self.cfg.terminate(
+                    whileTrue,
+                    Jump(condBlock.id)
+                )
+
+            #retorna None porque não existe continuação normal depois de um while (true).
+            return None
+
+        #restoblock foi jogado aqui, de agora em diante a lógica segue o que eraantes
+        restoBlock = self.cfg.new_block()
+
+         #Define os dois caminhos possíveis da condição, dando para o condBlock essa checagem
         #verdadeiro para executar o whileBlock e o false, para executar restoBlock
         self.cfg.terminate(
             condBlock.id,
@@ -184,7 +225,7 @@ class CFGBuilder:
             )
         )
 
-        # Constrói os comandos que estão dentro do while
+        #Constrói os comandos que estão dentro do while
         whileTrue = self._build_block(
             statement.body,
             whileBlock.id
@@ -198,7 +239,7 @@ class CFGBuilder:
                 Jump(condBlock.id)
             )
 
-        # Retorna o bloco em que a execução continua após o while
+        #Retorna o bloco em que a execução continua após o while.
         return restoBlock.id
            
 
